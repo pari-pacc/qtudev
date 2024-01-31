@@ -43,16 +43,16 @@ class UdevMonitorPrivate
 {
     Q_DECLARE_PUBLIC(UdevMonitor)
 public:
-    UdevMonitorPrivate(UdevMonitor *qq, Udev *u);
+    UdevMonitorPrivate(UdevMonitor* qq, Udev* u);
     ~UdevMonitorPrivate();
 
     void _q_udevEventHandler();
 
-    Udev *udev;
-    struct udev_monitor *monitor;
+    Udev* udev;
+    struct udev_monitor* monitor;
 
 protected:
-    UdevMonitor *q_ptr;
+    UdevMonitor* q_ptr;
 };
 
 } // namespace QtUdev

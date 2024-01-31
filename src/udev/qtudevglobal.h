@@ -27,9 +27,9 @@
 #include <QtCore/qglobal.h>
 
 #if defined(LIRI_BUILD_QTUDEV_LIB)
-#  define QTUDEV_EXPORT Q_DECL_EXPORT
+#define QTUDEV_EXPORT Q_DECL_EXPORT
 #else
-#  define QTUDEV_EXPORT Q_DECL_IMPORT
+#define QTUDEV_EXPORT Q_DECL_IMPORT
 #endif
 #define QTUDEV_NO_EXPORT Q_DECL_HIDDEN
 

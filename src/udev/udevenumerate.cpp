@@ -21,10 +21,10 @@
  * $END_LICENSE$
  ***************************************************************************/
 
+#include "udevenumerate.h"
 #include "logindseat_p.h"
 #include "udev.h"
 #include "udev_p.h"
-#include "udevenumerate.h"
 #include "udevenumerate_p.h"
 
 namespace QtUdev {
@@ -33,7 +33,7 @@ namespace QtUdev {
  * UdevEnumeratePrivate
  */
 
-UdevEnumeratePrivate::UdevEnumeratePrivate(UdevDevice::DeviceTypes t, Udev *u)
+UdevEnumeratePrivate::UdevEnumeratePrivate(UdevDevice::DeviceTypes t, Udev* u)
     : logindSeat(new LogindSeat)
     , types(t)
     , udev(u)
@@ -85,7 +85,7 @@ UdevEnumeratePrivate::~UdevEnumeratePrivate()
  * UdevEnumerate
  */
 
-UdevEnumerate::UdevEnumerate(UdevDevice::DeviceTypes types, Udev *udev)
+UdevEnumerate::UdevEnumerate(UdevDevice::DeviceTypes types, Udev* udev)
     : d_ptr(new UdevEnumeratePrivate(types, udev))
 {
     qRegisterMetaType<UdevDevice>();
@@ -96,11 +96,11 @@ UdevEnumerate::~UdevEnumerate()
     delete d_ptr;
 }
 
-QList<UdevDevice *> UdevEnumerate::scan() const
+QList<UdevDevice*> UdevEnumerate::scan() const
 {
     Q_D(const UdevEnumerate);
 
-    QList<UdevDevice *> list;
+    QList<UdevDevice*> list;
 
     if (!d->enumerate)
         return list;
@@ -110,13 +110,15 @@ QList<UdevDevice *> UdevEnumerate::scan() const
         return list;
     }
 
-    udev_device *drmDevice = nullptr;
-    udev_device *drmPrimaryDevice = nullptr;
+    udev_device* drmDevice = nullptr;
+    udev_device* drmPrimaryDevice = nullptr;
 
-    udev_list_entry *entry;
-    udev_list_entry_foreach(entry, udev_enumerate_get_list_entry(d->enumerate)) {
-        const char *syspath = udev_list_entry_get_name(entry);
-        udev_device *dev = udev_device_new_from_syspath(UdevPrivate::get(d->udev)->udev, syspath);
+    udev_list_entry* entry;
+    udev_list_entry_foreach(entry, udev_enumerate_get_list_entry(d->enumerate))
+    {
+        char const* syspath = udev_list_entry_get_name(entry);
+        udev_device* dev
+          = udev_device_new_from_syspath(UdevPrivate::get(d->udev)->udev, syspath);
         if (!dev)
             continue;
 
@@ -131,19 +133,23 @@ QList<UdevDevice *> UdevEnumerate::scan() const
 
         QString node = QString::fromUtf8(udev_device_get_devnode(dev));
 
-        if (d->types.testFlag(UdevDevice::InputDevice_Mask) && node.startsWith(QLatin1String("/dev/input/event"))) {
-            UdevDevice *device = new UdevDevice;
+        if (
+          d->types.testFlag(UdevDevice::InputDevice_Mask)
+          && node.startsWith(QLatin1String("/dev/input/event"))) {
+            UdevDevice* device = new UdevDevice;
             device->initialize(dev);
             list.append(device);
         }
 
-        if (d->types.testFlag(UdevDevice::VideoDevice_Mask) && node.startsWith(QLatin1String("/dev/dri/card"))) {
+        if (
+          d->types.testFlag(UdevDevice::VideoDevice_Mask)
+          && node.startsWith(QLatin1String("/dev/dri/card"))) {
             // We can have more than one DRM device on our seat, so the filter
             // might want us to pick up only the primary video device
             // In any case we'll be adding just one DRM device to the list
             if (d->types.testFlag(UdevDevice::PrimaryVideoDevice)) {
-                udev_device *pci =
-                        udev_device_get_parent_with_subsystem_devtype(dev, "pci", nullptr);
+                udev_device* pci
+                  = udev_device_get_parent_with_subsystem_devtype(dev, "pci", nullptr);
                 if (pci) {
                     if (qstrcmp(udev_device_get_sysattr_value(pci, "boot_vga"), "1") == 0)
                         drmPrimaryDevice = dev;
@@ -159,11 +165,12 @@ QList<UdevDevice *> UdevEnumerate::scan() const
 
     // Add any DRM device previously enumerated
     if (drmPrimaryDevice) {
-        UdevDevice *device = new UdevDevice;
+        UdevDevice* device = new UdevDevice;
         device->initialize(drmPrimaryDevice);
         list.append(device);
-    } else if (drmDevice) {
-        UdevDevice *device = new UdevDevice;
+    }
+    else if (drmDevice) {
+        UdevDevice* device = new UdevDevice;
         device->initialize(drmDevice);
         list.append(device);
     }

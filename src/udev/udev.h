@@ -42,12 +42,13 @@ public:
 
     bool isValid() const;
 
-    UdevDevice *deviceFromFileName(const QString &fileName) const;
-    UdevDevice *deviceFromSubSystemAndName(const QString &subSystem, const QString &name) const;
-    UdevDevice *deviceFromSysfsPath(const QString &sysfsPath) const;
+    UdevDevice* deviceFromFileName(QString const& fileName) const;
+    UdevDevice*
+    deviceFromSubSystemAndName(QString const& subSystem, QString const& name) const;
+    UdevDevice* deviceFromSysfsPath(QString const& sysfsPath) const;
 
 private:
-    UdevPrivate *const d_ptr;
+    UdevPrivate* const d_ptr;
 };
 
 } // namespace QtUdev

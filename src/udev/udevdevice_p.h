@@ -47,7 +47,7 @@ public:
     UdevDevicePrivate();
     ~UdevDevicePrivate();
 
-    udev_device *device = nullptr;
+    udev_device* device = nullptr;
 };
 
 } // namespace QtUdev

@@ -39,7 +39,8 @@ UdevPrivate::UdevPrivate()
 {
     udev = udev_new();
     if (!udev)
-        qCWarning(lcUdev, "Unable to get udev library context: no devices can be detected");
+        qCWarning(
+          lcUdev, "Unable to get udev library context: no devices can be detected");
 }
 
 UdevPrivate::~UdevPrivate()
@@ -48,7 +49,7 @@ UdevPrivate::~UdevPrivate()
         udev_unref(udev);
 }
 
-UdevPrivate *UdevPrivate::get(Udev *u)
+UdevPrivate* UdevPrivate::get(Udev* u)
 {
     return u ? u->d_func() : nullptr;
 }
@@ -73,7 +74,7 @@ bool Udev::isValid() const
     return d->udev;
 }
 
-UdevDevice *Udev::deviceFromFileName(const QString &fileName) const
+UdevDevice* Udev::deviceFromFileName(QString const& fileName) const
 {
     Q_D(const Udev);
 
@@ -85,7 +86,7 @@ UdevDevice *Udev::deviceFromFileName(const QString &fileName) const
     if (QT_STAT(qPrintable(fileName), &sb) != 0)
         return nullptr;
 
-    udev_device *dev = nullptr;
+    udev_device* dev = nullptr;
 
     if (S_ISBLK(sb.st_mode))
         dev = udev_device_new_from_devnum(d->udev, 'b', sb.st_rdev);
@@ -95,35 +96,35 @@ UdevDevice *Udev::deviceFromFileName(const QString &fileName) const
     if (!dev)
         return nullptr;
 
-    UdevDevice *device = new UdevDevice;
+    UdevDevice* device = new UdevDevice;
     device->initialize(dev);
     return device;
 }
 
-UdevDevice *Udev::deviceFromSubSystemAndName(const QString &subSystem, const QString &name) const
+UdevDevice*
+Udev::deviceFromSubSystemAndName(QString const& subSystem, QString const& name) const
 {
     Q_D(const Udev);
 
     if (!isValid())
         return nullptr;
 
-    udev_device *dev = udev_device_new_from_subsystem_sysname(d->udev,
-                                                              qPrintable(subSystem),
-                                                              qPrintable(name));
-    UdevDevice *device = new UdevDevice;
+    udev_device* dev = udev_device_new_from_subsystem_sysname(
+      d->udev, qPrintable(subSystem), qPrintable(name));
+    UdevDevice* device = new UdevDevice;
     device->initialize(dev);
     return device;
 }
 
-UdevDevice *Udev::deviceFromSysfsPath(const QString &sysfsPath) const
+UdevDevice* Udev::deviceFromSysfsPath(QString const& sysfsPath) const
 {
     Q_D(const Udev);
 
     if (!isValid())
         return nullptr;
 
-    udev_device *dev = udev_device_new_from_syspath(d->udev, qPrintable(sysfsPath));
-    UdevDevice *device = new UdevDevice;
+    udev_device* dev = udev_device_new_from_syspath(d->udev, qPrintable(sysfsPath));
+    UdevDevice* device = new UdevDevice;
     device->initialize(dev);
     return device;
 }

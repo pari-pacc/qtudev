@@ -28,17 +28,17 @@
 #include "logindseat_p.h"
 #include "udev_p.h"
 
-#include <unistd.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #define LOGIN1_SERVICE QStringLiteral("org.freedesktop.login1")
 
-#define LOGIN1_OBJECT QLatin1String("/org/freedesktop/login1")
+#define LOGIN1_OBJECT            QLatin1String("/org/freedesktop/login1")
 #define LOGIN1_MANAGER_INTERFACE QLatin1String("org.freedesktop.login1.Manager")
-#define LOGIN1_SEAT_INTERFACE QLatin1String("org.freedesktop.login1.Seat")
+#define LOGIN1_SEAT_INTERFACE    QLatin1String("org.freedesktop.login1.Seat")
 #define LOGIN1_SESSION_INTERFACE QLatin1String("org.freedesktop.login1.Session")
 
-#define DBUS_SERVICE QLatin1String("org.freedesktop.DBus")
+#define DBUS_SERVICE              QLatin1String("org.freedesktop.DBus")
 #define DBUS_PROPERTIES_INTERFACE QLatin1String("org.freedesktop.DBus.Properties")
 
 LogindSeat::LogindSeat()
@@ -60,7 +60,7 @@ QString LogindSeat::id() const
     return m_id;
 }
 
-bool LogindSeat::findActiveSession(DBusUserSession &userSession) const
+bool LogindSeat::findActiveSession(DBusUserSession& userSession) const
 {
     auto bus = QDBusConnection::systemBus();
 
@@ -70,17 +70,17 @@ bool LogindSeat::findActiveSession(DBusUserSession &userSession) const
         QVariantList args;
         args << ::getuid();
 
-        auto message =
-                QDBusMessage::createMethodCall(LOGIN1_SERVICE,
-                                               LOGIN1_OBJECT,
-                                               LOGIN1_MANAGER_INTERFACE,
-                                               QStringLiteral("GetUser"));
+        auto message = QDBusMessage::createMethodCall(
+          LOGIN1_SERVICE,
+          LOGIN1_OBJECT,
+          LOGIN1_MANAGER_INTERFACE,
+          QStringLiteral("GetUser"));
         message.setArguments(args);
 
         QDBusReply<QDBusObjectPath> reply = bus.call(message);
         if (!reply.isValid()) {
-            qCWarning(lcUdev, "Failed to get user path: %s",
-                      qPrintable(reply.error().message()));
+            qCWarning(
+              lcUdev, "Failed to get user path: %s", qPrintable(reply.error().message()));
             return false;
         }
 
@@ -92,36 +92,38 @@ bool LogindSeat::findActiveSession(DBusUserSession &userSession) const
         args << QStringLiteral("org.freedesktop.login1.User")
              << QStringLiteral("Sessions");
 
-        QDBusMessage message =
-                QDBusMessage::createMethodCall(LOGIN1_SERVICE,
-                                               userPath.path(),
-                                               DBUS_PROPERTIES_INTERFACE,
-                                               QStringLiteral("Get"));
+        QDBusMessage message = QDBusMessage::createMethodCall(
+          LOGIN1_SERVICE,
+          userPath.path(),
+          DBUS_PROPERTIES_INTERFACE,
+          QStringLiteral("Get"));
         message.setArguments(args);
 
         QDBusReply<QVariant> reply = bus.call(message);
         if (!reply.isValid()) {
-            qCWarning(lcUdev, "Failed to list user sessions: %s",
-                      qPrintable(reply.error().message()));
+            qCWarning(
+              lcUdev,
+              "Failed to list user sessions: %s",
+              qPrintable(reply.error().message()));
             return false;
         }
 
         // Find which session meets our critera
-        QStringList validTypes = {
-            QStringLiteral("tty"),
-            QStringLiteral("wayland"),
-            QStringLiteral("x11")
-        };
+        QStringList validTypes
+          = { QStringLiteral("tty"), QStringLiteral("wayland"), QStringLiteral("x11") };
 
-        // We expect to have only one session for each user, and the session for the current
-        // user is supposed to be active because the user logged in with a login manager (either
-        // text based such as getty, or graphical like SDDM).
-        // Graphical login managers usually don't spawn a second session, but activate an already
+        // We expect to have only one session for each user, and the session for the
+        // current user is supposed to be active because the user logged in with a login
+        // manager (either text based such as getty, or graphical like SDDM). Graphical
+        // login managers usually don't spawn a second session, but activate an already
         // existing session for the user.
-        DBusUserSessionVector sessions = qdbus_cast<DBusUserSessionVector>(reply.value().value<QDBusArgument>());
-        for (const auto &curSession : qAsConst(sessions)) {
-            const QString type = getSessionType(curSession.id, curSession.objectPath.path());
-            const QString state = getSessionState(curSession.id, curSession.objectPath.path());
+        DBusUserSessionVector sessions
+          = qdbus_cast<DBusUserSessionVector>(reply.value().value<QDBusArgument>());
+        for (auto const& curSession : qAsConst(sessions)) {
+            const QString type
+              = getSessionType(curSession.id, curSession.objectPath.path());
+            const QString state
+              = getSessionState(curSession.id, curSession.objectPath.path());
 
             if (!validTypes.contains(type))
                 continue;
@@ -137,75 +139,74 @@ bool LogindSeat::findActiveSession(DBusUserSession &userSession) const
     return false;
 }
 
-QString LogindSeat::getSessionType(const QString &sessionId, const QString &sessionPath) const
+QString
+LogindSeat::getSessionType(QString const& sessionId, QString const& sessionPath) const
 {
     auto bus = QDBusConnection::systemBus();
 
     QVariantList args;
-    args << LOGIN1_SESSION_INTERFACE
-         << QStringLiteral("Type");
+    args << LOGIN1_SESSION_INTERFACE << QStringLiteral("Type");
 
-    auto message =
-            QDBusMessage::createMethodCall(LOGIN1_SERVICE,
-                                           sessionPath,
-                                           DBUS_PROPERTIES_INTERFACE,
-                                           QStringLiteral("Get"));
+    auto message = QDBusMessage::createMethodCall(
+      LOGIN1_SERVICE, sessionPath, DBUS_PROPERTIES_INTERFACE, QStringLiteral("Get"));
     message.setArguments(args);
 
     QDBusReply<QVariant> reply = bus.call(message);
     if (!reply.isValid()) {
-        qCWarning(lcUdev, "Failed to get type for session %s: %s",
-                  qPrintable(sessionId), qPrintable(reply.error().message()));
+        qCWarning(
+          lcUdev,
+          "Failed to get type for session %s: %s",
+          qPrintable(sessionId),
+          qPrintable(reply.error().message()));
         return QString();
     }
 
     return reply.value().toString();
 }
 
-QString LogindSeat::getSessionState(const QString &sessionId, const QString &sessionPath) const
+QString
+LogindSeat::getSessionState(QString const& sessionId, QString const& sessionPath) const
 {
     auto bus = QDBusConnection::systemBus();
 
     QVariantList args;
-    args << LOGIN1_SESSION_INTERFACE
-         << QStringLiteral("State");
+    args << LOGIN1_SESSION_INTERFACE << QStringLiteral("State");
 
-    auto message =
-            QDBusMessage::createMethodCall(LOGIN1_SERVICE,
-                                           sessionPath,
-                                           DBUS_PROPERTIES_INTERFACE,
-                                           QStringLiteral("Get"));
+    auto message = QDBusMessage::createMethodCall(
+      LOGIN1_SERVICE, sessionPath, DBUS_PROPERTIES_INTERFACE, QStringLiteral("Get"));
     message.setArguments(args);
 
     QDBusReply<QVariant> reply = bus.call(message);
     if (!reply.isValid()) {
-        qCWarning(lcUdev, "Failed to get state for session %s: %s",
-                  qPrintable(sessionId), qPrintable(reply.error().message()));
+        qCWarning(
+          lcUdev,
+          "Failed to get state for session %s: %s",
+          qPrintable(sessionId),
+          qPrintable(reply.error().message()));
         return QString();
     }
 
     return reply.value().toString();
 }
 
-QString LogindSeat::getSeatId(const QString &sessionPath) const
+QString LogindSeat::getSeatId(QString const& sessionPath) const
 {
     auto bus = QDBusConnection::systemBus();
 
     QVariantList args;
-    args << LOGIN1_SESSION_INTERFACE
-         << QStringLiteral("Seat");
+    args << LOGIN1_SESSION_INTERFACE << QStringLiteral("Seat");
 
-    auto message =
-            QDBusMessage::createMethodCall(LOGIN1_SERVICE,
-                                           sessionPath,
-                                           DBUS_PROPERTIES_INTERFACE,
-                                           QStringLiteral("Get"));
+    auto message = QDBusMessage::createMethodCall(
+      LOGIN1_SERVICE, sessionPath, DBUS_PROPERTIES_INTERFACE, QStringLiteral("Get"));
     message.setArguments(args);
 
     QDBusReply<QVariant> reply = bus.call(message);
     if (!reply.isValid()) {
-        qCWarning(lcUdev, "Failed to get seat from session path \"%s\": %s",
-                  qPrintable(sessionPath), qPrintable(reply.error().message()));
+        qCWarning(
+          lcUdev,
+          "Failed to get seat from session path \"%s\": %s",
+          qPrintable(sessionPath),
+          qPrintable(reply.error().message()));
         return QString();
     }
 
@@ -213,7 +214,7 @@ QString LogindSeat::getSeatId(const QString &sessionPath) const
     return dbusSeat.id;
 }
 
-QDBusArgument &operator<<(QDBusArgument &argument, const DBusUserSession &userSession)
+QDBusArgument& operator<<(QDBusArgument& argument, DBusUserSession const& userSession)
 {
     argument.beginStructure();
     argument << userSession.id << userSession.objectPath;
@@ -221,7 +222,8 @@ QDBusArgument &operator<<(QDBusArgument &argument, const DBusUserSession &userSe
     return argument;
 }
 
-const QDBusArgument &operator>>(const QDBusArgument &argument, DBusUserSession &userSession)
+QDBusArgument const&
+operator>>(QDBusArgument const& argument, DBusUserSession& userSession)
 {
     argument.beginStructure();
     argument >> userSession.id >> userSession.objectPath;
@@ -229,7 +231,7 @@ const QDBusArgument &operator>>(const QDBusArgument &argument, DBusUserSession &
     return argument;
 }
 
-QDBusArgument &operator<<(QDBusArgument &argument, const DBusSeat &seat)
+QDBusArgument& operator<<(QDBusArgument& argument, DBusSeat const& seat)
 {
     argument.beginStructure();
     argument << seat.id << seat.objectPath;
@@ -237,7 +239,7 @@ QDBusArgument &operator<<(QDBusArgument &argument, const DBusSeat &seat)
     return argument;
 }
 
-const QDBusArgument &operator>>(const QDBusArgument &argument, DBusSeat &seat)
+QDBusArgument const& operator>>(QDBusArgument const& argument, DBusSeat& seat)
 {
     argument.beginStructure();
     argument >> seat.id >> seat.objectPath;

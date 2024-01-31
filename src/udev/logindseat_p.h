@@ -46,11 +46,12 @@ public:
 };
 Q_DECLARE_METATYPE(DBusSeat)
 
-QDBusArgument &operator<<(QDBusArgument &argument, const DBusUserSession &userSession);
-const QDBusArgument &operator>>(const QDBusArgument &argument, DBusUserSession &userSession);
+QDBusArgument& operator<<(QDBusArgument& argument, DBusUserSession const& userSession);
+QDBusArgument const&
+operator>>(QDBusArgument const& argument, DBusUserSession& userSession);
 
-QDBusArgument &operator<<(QDBusArgument &argument, const DBusSeat &seat);
-const QDBusArgument &operator>>(const QDBusArgument &argument, DBusSeat &seat);
+QDBusArgument& operator<<(QDBusArgument& argument, DBusSeat const& seat);
+QDBusArgument const& operator>>(QDBusArgument const& argument, DBusSeat& seat);
 
 class LogindSeat
 {
@@ -62,10 +63,10 @@ public:
 private:
     QString m_id = QStringLiteral("seat0");
 
-    bool findActiveSession(DBusUserSession &userSession) const;
-    QString getSessionType(const QString &sessionId, const QString &sessionPath) const;
-    QString getSessionState(const QString &sessionId, const QString &sessionPath) const;
-    QString getSeatId(const QString &sessionPath) const;
+    bool findActiveSession(DBusUserSession& userSession) const;
+    QString getSessionType(QString const& sessionId, QString const& sessionPath) const;
+    QString getSessionState(QString const& sessionId, QString const& sessionPath) const;
+    QString getSeatId(QString const& sessionPath) const;
 };
 
 #endif // LOGINDSEAT_P_H

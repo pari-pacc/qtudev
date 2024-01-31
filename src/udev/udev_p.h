@@ -55,12 +55,11 @@ public:
     UdevPrivate();
     ~UdevPrivate();
 
-    static UdevPrivate *get(Udev *u);
+    static UdevPrivate* get(Udev* u);
 
-    struct udev *udev;
+    struct udev* udev;
 };
 
 } // namespace QtUdev
 
 #endif // QTUDEV_P_H
-

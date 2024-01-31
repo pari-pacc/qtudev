@@ -30,19 +30,20 @@
 
 using namespace QtUdev;
 
-class TestUdev : public QObject
+class TestUdev: public QObject
 {
     Q_OBJECT
 public:
-    TestUdev(QObject *parent = nullptr)
+    TestUdev(QObject* parent = nullptr)
         : QObject(parent)
     {
     }
 
 private:
-    UMockdevTestbed *m_bed = nullptr;
+    UMockdevTestbed* m_bed = nullptr;
 
 private Q_SLOTS:
+
     void initTestCase()
     {
         m_bed = umockdev_testbed_new();
@@ -68,23 +69,27 @@ private Q_SLOTS:
 
     void testConnection()
     {
-        Udev *udev = new Udev;
+        Udev* udev = new Udev;
         QVERIFY(udev->isValid());
         delete udev;
     }
 
     void testDevice()
     {
-        Udev *udev = new Udev;
+        Udev* udev = new Udev;
         QVERIFY(udev->isValid());
 
-        UdevDevice *dev = udev->deviceFromFileName(QStringLiteral("/dev/sda"));
+        UdevDevice* dev = udev->deviceFromFileName(QStringLiteral("/dev/sda"));
         QVERIFY(dev);
         QCOMPARE(dev->deviceNode(), QStringLiteral("/dev/sda"));
         QCOMPARE(dev->name(), QStringLiteral("sda"));
         QVERIFY(dev->hasProperty(QStringLiteral("ID_SERIAL")));
-        QCOMPARE(dev->property(QStringLiteral("ID_SERIAL")), QStringLiteral("TOSHIBA_MQ01ABD100_Y49DSZAOS"));
-        QCOMPARE(dev->property(QStringLiteral("ID_MODEL")), QStringLiteral("TOSHIBA_MQ01ABD100"));
+        QCOMPARE(
+          dev->property(QStringLiteral("ID_SERIAL")),
+          QStringLiteral("TOSHIBA_MQ01ABD100_Y49DSZAOS"));
+        QCOMPARE(
+          dev->property(QStringLiteral("ID_MODEL")),
+          QStringLiteral("TOSHIBA_MQ01ABD100"));
 
         delete dev;
         delete udev;
@@ -92,11 +97,11 @@ private Q_SLOTS:
 
     void testEnumerate()
     {
-        Udev *udev = new Udev;
+        Udev* udev = new Udev;
         QVERIFY(udev->isValid());
 
-        UdevEnumerate *enumerate = new UdevEnumerate(UdevDevice::InputDevice_Mask, udev);
-        QList<UdevDevice *> devices = enumerate->scan();
+        UdevEnumerate* enumerate = new UdevEnumerate(UdevDevice::InputDevice_Mask, udev);
+        QList<UdevDevice*> devices = enumerate->scan();
         QVERIFY(devices.size() > 0);
 
         delete enumerate;

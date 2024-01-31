@@ -29,12 +29,13 @@
 
 namespace QtUdev {
 
-static inline QStringList listFromEntries(udev_list_entry *l)
+static inline QStringList listFromEntries(udev_list_entry* l)
 {
     QStringList list;
-    udev_list_entry *entry;
+    udev_list_entry* entry;
 
-    udev_list_entry_foreach(entry, l) {
+    udev_list_entry_foreach(entry, l)
+    {
         list.append(QString::fromUtf8(udev_list_entry_get_name(entry)));
     }
 
@@ -95,7 +96,9 @@ UdevDevice::DeviceTypes UdevDevice::type() const
     if (qstrcmp(udev_device_get_property_value(d->device, "ID_INPUT_TOUCHPAD"), "1") == 0)
         result |= TouchpadDevice;
 
-    if (qstrcmp(udev_device_get_property_value(d->device, "ID_INPUT_TOUCHSCREEN"), "1") == 0)
+    if (
+      qstrcmp(udev_device_get_property_value(d->device, "ID_INPUT_TOUCHSCREEN"), "1")
+      == 0)
         result |= TouchscreenDevice;
 
     if (qstrcmp(udev_device_get_property_value(d->device, "ID_INPUT_TABLET"), "1") == 0)
@@ -107,8 +110,8 @@ UdevDevice::DeviceTypes UdevDevice::type() const
     if (qstrcmp(udev_device_get_subsystem(d->device), "drm") == 0) {
         bool isSet = false;
 
-        udev_device *pci =
-                udev_device_get_parent_with_subsystem_devtype(d->device, "pci", nullptr);
+        udev_device* pci
+          = udev_device_get_parent_with_subsystem_devtype(d->device, "pci", nullptr);
         if (pci) {
             if (qstrcmp(udev_device_get_sysattr_value(pci, "boot_vga"), "1") == 0) {
                 result |= PrimaryVideoDevice;
@@ -187,20 +190,22 @@ int UdevDevice::sysfsNumber() const
     return QByteArray(udev_device_get_sysnum(d->device)).toInt();
 }
 
-QString UdevDevice::property(const QString &name) const
+QString UdevDevice::property(QString const& name) const
 {
     Q_D(const UdevDevice);
     if (!d->device)
         return QString();
-    return QString::fromLatin1(udev_device_get_property_value(d->device, name.toLatin1().constData()));
+    return QString::fromLatin1(
+      udev_device_get_property_value(d->device, name.toLatin1().constData()));
 }
 
-bool UdevDevice::hasProperty(const QString &name) const
+bool UdevDevice::hasProperty(QString const& name) const
 {
     Q_D(const UdevDevice);
     if (!d->device)
         return false;
-    return udev_device_get_property_value(d->device, name.toLatin1().constData()) != nullptr;
+    return udev_device_get_property_value(d->device, name.toLatin1().constData())
+      != nullptr;
 }
 
 QStringList UdevDevice::deviceProperties() const
@@ -219,29 +224,29 @@ QStringList UdevDevice::sysfsProperties() const
     return listFromEntries(udev_device_get_sysattr_list_entry(d->device));
 }
 
-UdevDevice *UdevDevice::parent() const
+UdevDevice* UdevDevice::parent() const
 {
     Q_D(const UdevDevice);
 
     if (!d->device)
         return nullptr;
 
-    udev_device *p = udev_device_get_parent(d->device);
+    udev_device* p = udev_device_get_parent(d->device);
     if (p) {
-        UdevDevice *parentDevice = new UdevDevice;
+        UdevDevice* parentDevice = new UdevDevice;
         parentDevice->d_ptr->device = p;
         return parentDevice;
     }
     return nullptr;
 }
 
-void UdevDevice::initialize(udev_device *dev)
+void UdevDevice::initialize(udev_device* dev)
 {
     Q_D(UdevDevice);
     d->device = dev;
 }
 
-QDebug operator<<(QDebug dbg, const UdevDevice &device)
+QDebug operator<<(QDebug dbg, UdevDevice const& device)
 {
     QDebugStateSaver saver(dbg);
     if (device.isValid())

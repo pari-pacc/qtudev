@@ -51,7 +51,8 @@ public:
         JoystickDevice = 0x20,
         GenericVideoDevice = 0x40,
         PrimaryVideoDevice = 0x80,
-        InputDevice_Mask = KeyboardDevice | MouseDevice | TouchpadDevice | TouchscreenDevice | TabletDevice | JoystickDevice,
+        InputDevice_Mask = KeyboardDevice | MouseDevice | TouchpadDevice
+          | TouchscreenDevice | TabletDevice | JoystickDevice,
         VideoDevice_Mask = GenericVideoDevice
     };
     Q_DECLARE_FLAGS(DeviceTypes, DeviceType)
@@ -74,18 +75,18 @@ public:
     QString sysfsPath() const;
     int sysfsNumber() const;
 
-    QString property(const QString &name) const;
-    bool hasProperty(const QString &name) const;
+    QString property(QString const& name) const;
+    bool hasProperty(QString const& name) const;
 
     QStringList deviceProperties() const;
     QStringList sysfsProperties() const;
 
-    UdevDevice *parent() const;
+    UdevDevice* parent() const;
 
 private:
-    void initialize(udev_device *dev);
+    void initialize(udev_device* dev);
 
-    UdevDevicePrivate *const d_ptr;
+    UdevDevicePrivate* const d_ptr;
 
     friend class Udev;
     friend class UdevEnumerate;
@@ -94,7 +95,7 @@ private:
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(UdevDevice::DeviceTypes)
 
-QDebug operator<<(QDebug, const UdevDevice &);
+QDebug operator<<(QDebug, UdevDevice const&);
 
 } // namespace QtUdev
 

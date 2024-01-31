@@ -35,7 +35,7 @@ namespace QtUdev {
  * UdevMonitorPrivate
  */
 
-UdevMonitorPrivate::UdevMonitorPrivate(UdevMonitor *qq, Udev *u)
+UdevMonitorPrivate::UdevMonitorPrivate(UdevMonitor* qq, Udev* u)
     : udev(u)
     , monitor(nullptr)
     , q_ptr(qq)
@@ -59,11 +59,11 @@ void UdevMonitorPrivate::_q_udevEventHandler()
 {
     Q_Q(UdevMonitor);
 
-    udev_device *dev = udev_monitor_receive_device(monitor);
+    udev_device* dev = udev_monitor_receive_device(monitor);
     if (!dev)
         return;
 
-    const char *action = udev_device_get_action(dev);
+    char const* action = udev_device_get_action(dev);
     if (!action) {
         udev_device_unref(dev);
         return;
@@ -88,7 +88,7 @@ void UdevMonitorPrivate::_q_udevEventHandler()
  * UdevMonitor
  */
 
-UdevMonitor::UdevMonitor(Udev *udev, QObject *parent)
+UdevMonitor::UdevMonitor(Udev* udev, QObject* parent)
     : QObject(parent)
     , d_ptr(new UdevMonitorPrivate(this, udev))
 {
@@ -96,7 +96,7 @@ UdevMonitor::UdevMonitor(Udev *udev, QObject *parent)
 
     Q_D(UdevMonitor);
     int fd = udev_monitor_get_fd(d->monitor);
-    QSocketNotifier *notifier = new QSocketNotifier(fd, QSocketNotifier::Read, this);
+    QSocketNotifier* notifier = new QSocketNotifier(fd, QSocketNotifier::Read, this);
     connect(notifier, SIGNAL(activated(int)), this, SLOT(_q_udevEventHandler()));
 }
 
@@ -111,19 +111,18 @@ bool UdevMonitor::isValid() const
     return d->monitor;
 }
 
-void UdevMonitor::filterSubSystemDevType(const QString &subSystem, const QString &devType)
+void UdevMonitor::filterSubSystemDevType(QString const& subSystem, QString const& devType)
 {
     Q_D(UdevMonitor);
 
     if (!isValid())
         return;
 
-    udev_monitor_filter_add_match_subsystem_devtype(d->monitor,
-                                                    qPrintable(subSystem),
-                                                    qPrintable(devType));
+    udev_monitor_filter_add_match_subsystem_devtype(
+      d->monitor, qPrintable(subSystem), qPrintable(devType));
 }
 
-void UdevMonitor::filterTag(const QString &tag)
+void UdevMonitor::filterTag(QString const& tag)
 {
     Q_D(UdevMonitor);
 

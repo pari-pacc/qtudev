@@ -34,28 +34,28 @@ class Udev;
 class UdevDevice;
 class UdevMonitorPrivate;
 
-class QT5UDEV_EXPORT UdevMonitor : public QObject
+class QT5UDEV_EXPORT UdevMonitor: public QObject
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(UdevMonitor)
 public:
-    explicit UdevMonitor(Udev *udev, QObject *parent = nullptr);
+    explicit UdevMonitor(Udev* udev, QObject* parent = nullptr);
     ~UdevMonitor();
 
     bool isValid() const;
 
-    void filterSubSystemDevType(const QString &subSystem, const QString &devType);
-    void filterTag(const QString &tag);
+    void filterSubSystemDevType(QString const& subSystem, QString const& devType);
+    void filterTag(QString const& tag);
 
 Q_SIGNALS:
-    void deviceAdded(const QtUdev::UdevDevice &device);
-    void deviceRemoved(const QtUdev::UdevDevice &device);
-    void deviceChanged(const QtUdev::UdevDevice &device);
-    void deviceOnlined(const QtUdev::UdevDevice &device);
-    void deviceOfflined(const QtUdev::UdevDevice &device);
+    void deviceAdded(QtUdev::UdevDevice const& device);
+    void deviceRemoved(QtUdev::UdevDevice const& device);
+    void deviceChanged(QtUdev::UdevDevice const& device);
+    void deviceOnlined(QtUdev::UdevDevice const& device);
+    void deviceOfflined(QtUdev::UdevDevice const& device);
 
 private:
-    UdevMonitorPrivate *const d_ptr;
+    UdevMonitorPrivate* const d_ptr;
 
     Q_PRIVATE_SLOT(d_func(), void _q_udevEventHandler())
 };

@@ -34,13 +34,13 @@ class QT5UDEV_EXPORT UdevEnumerate
 {
     Q_DECLARE_PRIVATE(UdevEnumerate)
 public:
-    UdevEnumerate(UdevDevice::DeviceTypes types, Udev *udev);
+    UdevEnumerate(UdevDevice::DeviceTypes types, Udev* udev);
     ~UdevEnumerate();
 
-    QList<UdevDevice *> scan() const;
+    QList<UdevDevice*> scan() const;
 
 private:
-    UdevEnumeratePrivate *const d_ptr;
+    UdevEnumeratePrivate* const d_ptr;
 };
 
 } // namespace QtUdev
